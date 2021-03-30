@@ -2,6 +2,7 @@
 const express= require('express');
 const path= require('path');
 const methodOverride= require('method-override');
+const ejsMate= require('ejs-mate');
 const mongoose= require('mongoose');
 const campgroundModel= require('./models/campground.js');
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true});
@@ -10,6 +11,8 @@ const app = express();
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+app.engine('ejs', ejsMate); //switches the engine for ejs to ejsMate from ejs
 
 //error handling in case db connection using mongoose gives an error
 mongoose.connection.on('error', console.error.bind(console, "Connection error:"));
@@ -21,6 +24,7 @@ mongoose.connection.once("open", ()=>{
 //required to parse req.body
 app.use(express.urlencoded({extended: true}));
 app.use(methodOverride('_method'));
+
 
 
 /********************************* ROUTES START *************************************************************************************************************************/
