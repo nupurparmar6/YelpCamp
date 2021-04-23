@@ -1,18 +1,17 @@
-
 const express= require('express');
 const path= require('path');
-const methodOverride= require('method-override');
-const ejsMate= require('ejs-mate');
 const mongoose= require('mongoose');
+const ejsMate= require('ejs-mate');
+const campgroundSchema= require('./schemasForJoi.js');
+const wrapAsync= require('./utilities/wrapAsync'); //note: remember to add next to all async fns
+const ExpressError= require('./utilities/ExpressError');
+const methodOverride= require('method-override');
 const campgroundModel= require('./models/campground.js');
+
+const Joi= require('joi'); //not really being used in this file
+
+
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true});
-
-const app = express();
-
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
-app.engine('ejs', ejsMate); //switches the engine for ejs to ejsMate from ejs
 
 //error handling in case db connection using mongoose gives an error
 mongoose.connection.on('error', console.error.bind(console, "Connection error:"));
@@ -20,10 +19,32 @@ mongoose.connection.once("open", ()=>{
     console.log("Database connected");
 });
 
+const app = express();
+app.engine('ejs', ejsMate); //switches the engine for ejs to ejsMate from ejs
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+
 //middleware
 //required to parse req.body
 app.use(express.urlencoded({extended: true}));
 app.use(methodOverride('_method'));
+
+//function we want to selectively call for middlewares but not for all so didnt use app.use //pass this fn as an argument
+const validateCampground= (req,res,next)=>{
+    
+        //joi gives the property of error
+        console.log(req.body);
+        const result= campgroundSchema.validate(req.body);
+        console.log(result);
+        if(result.error){
+            //details is an array thus we are extracting message from all and joining using ','
+            const message= result.error.details.map((element)=>element.message).join(',');
+            throw new ExpressError(message, 400)
+        }else{
+            next();
+        }
+}
 
 
 
@@ -43,39 +64,42 @@ app.get('/campgrounds/new', (req,res)=>{
     res.render('campgrounds/new');
 });
 
+
 //posts this form info
-app.post('/campgrounds', async(req,res)=>{
-    // res.send(req.body);
+app.post('/campgrounds', validateCampground, wrapAsync(async(req,res,next)=>{
+    
+    // if(!req.body.campgrounds) throw new ExpressError("Invalid Campground Data", 404); //USING JOI FOR THIS NOW
     const newCamp= new campgroundModel(req.body.campgrounds);
     await newCamp.save();
     res.redirect(`/campgrounds/${newCamp._id}`);
-});
+}));
+
 
 /**** READ **********************************************************************************************/
 // Index ie show all
-app.get('/campgrounds', async(req,res) =>{
+app.get('/campgrounds', wrapAsync(async(req,res,next)=>{
     let campsArr= await campgroundModel.find({});
     res.render('campgrounds/index', {campsArr});
-});
+}));
 
 //Details
-app.get('/campgrounds/:id', async(req,res)=>{
+app.get('/campgrounds/:id', wrapAsync(async(req,res,next)=>{
     const id= req.params.id;
     const camp= await campgroundModel.findById(id);
     res.render('campgrounds/show',{camp});
     // res.send("chal toh raha hai");
-});
+}));
 
 /**** UPDATE **********************************************************************************************/
 
 //serves form
-app.get('/campgrounds/:id/edit', async(req,res)=>{
+app.get('/campgrounds/:id/edit', wrapAsync(async(req,res,next)=>{
     const id= req.params.id;
     const camp= await campgroundModel.findById(id);
     res.render('campgrounds/edit', {camp});
-});
+}));
 
-app.put('/campgrounds/:id', async(req,res)=>{
+app.put('/campgrounds/:id', validateCampground, wrapAsync(async(req,res,next)=>{
 
     const id= req.params.id;
 
@@ -84,17 +108,33 @@ app.put('/campgrounds/:id', async(req,res)=>{
 
     //shows details page
     res.redirect(`/campgrounds/${updatedCamp._id}`);
-});
+}));
 
 /**** DELETE **********************************************************************************************/
 
-app.delete('/campgrounds/:id', async(req,res)=>{
+app.delete('/campgrounds/:id', wrapAsync(async(req,res,next)=>{
     const id= req.params.id;
     await campgroundModel.findByIdAndDelete(id);
     res.redirect('/campgrounds');
-});
+}));
 
 /***** End of Campgrounds CRUD **********************************************************************************************/
+
+/***** Error handling middleware **********************************************************************************************/
+//.all means get/post/put etc. anything would work
+app.all('*',(req,res,next)=>{
+    next(new ExpressError("Page Not Found(responding to error from all route)",404));
+})
+//this error handler will be hit whenever we throw an instance of ExpressError or any other error occurs on its own
+app.use((err,req,res,next)=>{
+    const {statusCode=500}= err;
+    if(!err.message) err.message = "Something went wrong";
+    res.status(statusCode).render('error', {err});
+});
+
+
+
+
 
 app.listen(3000, () => {
     console.log('Listening on port 3000!')
