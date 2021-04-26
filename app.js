@@ -3,13 +3,12 @@ const path= require('path');
 const mongoose= require('mongoose');
 const ejsMate= require('ejs-mate');
 const campgroundSchema= require('./schemasForJoi.js');
+const reviewSchema= require('./schemasForJoi.js');
 const wrapAsync= require('./utilities/wrapAsync'); //note: remember to add next to all async fns
 const ExpressError= require('./utilities/ExpressError');
 const methodOverride= require('method-override');
 const campgroundModel= require('./models/campground.js');
-
-const Joi= require('joi'); //not really being used in this file
-
+const reviewModel= require('./models/review.js');
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true});
 
@@ -44,6 +43,21 @@ const validateCampground= (req,res,next)=>{
         }else{
             next();
         }
+}
+
+const validateReview= (req,res,next)=>{
+    
+    //joi gives the property of error
+    console.log(req.body);
+    const result= reviewSchema.validate(req.body);
+    console.log(result);
+    if(result.error){
+        //details is an array thus we are extracting message from all and joining using ','
+        const message= result.error.details.map((element)=>element.message).join(',');
+        throw new ExpressError(message, 400)
+    }else{
+        next();
+    }
 }
 
 
@@ -85,7 +99,8 @@ app.get('/campgrounds', wrapAsync(async(req,res,next)=>{
 //Details
 app.get('/campgrounds/:id', wrapAsync(async(req,res,next)=>{
     const id= req.params.id;
-    const camp= await campgroundModel.findById(id);
+    const camp= await campgroundModel.findById(id).populate('reviews');
+    // camp.populate('reviews');
     res.render('campgrounds/show',{camp});
     // res.send("chal toh raha hai");
 }));
@@ -117,8 +132,30 @@ app.delete('/campgrounds/:id', wrapAsync(async(req,res,next)=>{
     await campgroundModel.findByIdAndDelete(id);
     res.redirect('/campgrounds');
 }));
-
 /***** End of Campgrounds CRUD **********************************************************************************************/
+/***** Reviews CRUD START **********************************************************************************************/
+
+
+/**** CREATE **********************************************************************************************/
+app.post('/campgrounds/:id/reviews', validateReview, wrapAsync(async(req,res,next)=>{
+    const camp= await campgroundModel.findById(req.params.id);
+    const newReview= new reviewModel(req.body.reviews);
+    camp.reviews.push(newReview);
+    await newReview.save();
+    await camp.save();
+    res.redirect(`/campgrounds/${camp._id}`)
+}));
+
+/**** DELETE **********************************************************************************************/
+app.delete('/campgrounds/:campId/reviews/:reviewId', wrapAsync(async(req,res)=>{
+    const {campId, reviewId}= req.params;
+    await campgroundModel.findByIdAndUpdate(campId,{$pull:{reviews:reviewId}});
+    await reviewModel.findByIdAndDelete(reviewId);
+    res.redirect(`/campgrounds/${campId}`);
+}));
+
+
+
 
 /***** Error handling middleware **********************************************************************************************/
 //.all means get/post/put etc. anything would work

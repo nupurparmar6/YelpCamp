@@ -12,7 +12,15 @@ let campgroundSchema= Joi.object({
     }).required()
 });
 
+let reviewSchema= Joi.object({
+    reviews: Joi.object({
+        rating: Joi.number().required().min(1).max(5),
+        body: Joi.string().required()
+    }).required()
+});
+
 module.exports= campgroundSchema;
+module.exports= reviewSchema;
 // const Joi = require('joi');
 
 // module.exports.campgroundSchema = Joi.object({
