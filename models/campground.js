@@ -2,7 +2,7 @@ const mongoose= require('mongoose');
 const reviewModel= require('./review.js');
 
 //schema
-const campgroundSchema= mongoose.Schema({
+const campgroundSchema= new mongoose.Schema({
     title: String,
     price: Number,
     image: String,
@@ -21,7 +21,6 @@ const campgroundSchema= mongoose.Schema({
 campgroundSchema.post('findOneAndDelete', async function(doc){
     //doc is the deleted campground
     console.log(doc);
-    console.dir(doc);
     if(doc){
         console.log("im working");
        await reviewModel.deleteMany({ 

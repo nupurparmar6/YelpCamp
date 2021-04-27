@@ -17,25 +17,22 @@
               <a href="/campgrounds/<%= camp._id %>/edit" class="card-link btn btn-info">Edit Campground</a>
               <form class="d-inline" action="/campgrounds/<%= camp._id %>?_method=DELETE" method="POST">
                 <button class="btn btn-danger">Delete campground</button>
-            </form>
-               <a href="/campgrounds" class="card-link btn btn-info">All campgrounds</a>
+              </form>
+              <a href="/campgrounds" class="card-link btn btn-info">All campgrounds</a>
             </div>
-            <div class="card-footer text-muted">
-                2 days ago
-                <!-- <a href="/campgrounds" class="btn btn-info">All campgrounds</a> -->
-            </div>
+            <div class="card-footer text-muted"> 2 days ago</div>
           </div>
     </div>
     <div class="col-6">
       <h4>Leave a Review!</h4>
           <form action="/campgrounds/<%=camp.id%>/reviews" method="POST" class="mb-3 needs-validation" novalidate>
             <div class="mb-3">
-            <label class="form-label" for="rating">Rating</label>
-            <input class="custom-range" type="range" min="1" max="5" step="1" name="reviews[rating]" id="rating">
-          </div>
+              <label class="form-label" for="rating">Rating</label>
+              <input class="custom-range" type="range" min="1" max="5" step="1" name="reviews[rating]" id="rating">
+            </div>
           <div class="mb-3">
-            <label class="form-label" for="review">Review</label>
-            <textarea class="form-control" type="text" name="reviews[body]" id="review" required></textarea>
+            <label class="form-label" for="body">Review</label>
+            <textarea class="form-control" type="text" name="reviews[body]" id="body" required></textarea>
             <div class="valid-feedback">Looks good!</div>
           </div>
           <button class="btn btn-success">Submit</button>
@@ -44,10 +41,10 @@
             <% for(let review of camp.reviews){ %>
             <div class="card mb-3">
               <div class="card-body">
-                <h5 class="card-title"><%= review.rating%></h5>
-                <p class="card-title"><%= review.body%></p>
+                <h5 class="card-title">Rating: <%= review.rating%></h5>
+                <p class="card-title">Review: <%= review.body%></p>
                 <form action="/campgrounds/<%=camp._id%>/reviews/<%=review._id%>?_method=DELETE" method="POST">
-                <button class="btn btn-sm btn-danger">Delete Review</button>
+                  <button class="btn btn-sm btn-danger">Delete Review</button>
                 </form>
               </div>
             </div>

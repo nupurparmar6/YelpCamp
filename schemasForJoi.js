@@ -1,6 +1,6 @@
 const Joi= require('joi');
 
-let campgroundSchema= Joi.object({
+module.exports.campgroundSchema= Joi.object({
     // campgrounds: Joi.object().required()
     
     campgrounds: Joi.object({
@@ -12,15 +12,15 @@ let campgroundSchema= Joi.object({
     }).required()
 });
 
-let reviewSchema= Joi.object({
+module.exports.reviewSchema= Joi.object({
     reviews: Joi.object({
         rating: Joi.number().required().min(1).max(5),
         body: Joi.string().required()
     }).required()
-});
+})
 
-module.exports= campgroundSchema;
-module.exports= reviewSchema;
+// module.exports= campgroundSchema;
+// module.exports= reviewSchema;
 // const Joi = require('joi');
 
 // module.exports.campgroundSchema = Joi.object({
