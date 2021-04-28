@@ -10,9 +10,9 @@ const campgroundModel= require('../models/campground.js');
 const validateReview= (req,res,next)=>{
     
     //joi gives the property of error
-    console.log(req.body);
+    // console.log(req.body);
     const result= reviewSchema.validate(req.body);
-    console.log(result);
+    // console.log(result);
     if(result.error){
         //details is an array thus we are extracting message from all and joining using ','
         const message= result.error.details.map((element)=>element.message).join(',');
@@ -31,6 +31,7 @@ router.post('/', validateReview, wrapAsync(async(req,res,next)=>{
     camp.reviews.push(newReview);
     await newReview.save();
     await camp.save();
+    req.flash('success', "Review added successfully");
     res.redirect(`/campgrounds/${camp._id}`)
 }));
 
@@ -39,6 +40,7 @@ router.delete('/:reviewId', wrapAsync(async(req,res)=>{
     const {id, reviewId}= req.params;
     await campgroundModel.findByIdAndUpdate(id,{$pull:{reviews:reviewId}});
     await reviewModel.findByIdAndDelete(reviewId);
+    req.flash('success', "Review Deleted");
     res.redirect(`/campgrounds/${id}`);
 }));
 
