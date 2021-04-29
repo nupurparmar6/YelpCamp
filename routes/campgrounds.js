@@ -5,6 +5,7 @@ const wrapAsync= require('../utilities/wrapAsync');
 const {campgroundSchema}= require('../schemasForJoi.js');
 const ExpressError= require('../utilities/ExpressError');
 const campgroundModel= require('../models/campground.js');
+const isLoggedIn= require('../authMiddleware.js');
 
 const validateCampground= (req,res,next)=>{
     
@@ -27,13 +28,13 @@ const validateCampground= (req,res,next)=>{
 
 //serves form for creating new camps
 //NOTE: this route needs to be above the '/campgrounds/:id' route or it will treat 'new' as an id and try to find stuff
-router.get('/new', (req,res)=>{
+router.get('/new', isLoggedIn, (req,res)=>{
     res.render('campgrounds/new');
 });
 
 
-//posts this form info
-router.post('/', validateCampground, wrapAsync(async(req,res,next)=>{
+//posts this form info //is
+router.post('/', isLoggedIn, validateCampground, wrapAsync(async(req,res,next)=>{
     
     // if(!req.body.campgrounds) throw new ExpressError("Invalid Campground Data", 404); //USING JOI FOR THIS NOW
     const newCamp= new campgroundModel(req.body.campgrounds);
@@ -66,7 +67,7 @@ router.get('/:id', wrapAsync(async(req,res,next)=>{
 /**** UPDATE **********************************************************************************************/
 
 //serves form
-router.get('/:id/edit', wrapAsync(async(req,res,next)=>{
+router.get('/:id/edit', isLoggedIn, wrapAsync(async(req,res,next)=>{
     const id= req.params.id;
     const camp= await campgroundModel.findById(id);
     //in case id is invalid, we are flashing an error
@@ -77,7 +78,7 @@ router.get('/:id/edit', wrapAsync(async(req,res,next)=>{
     res.render('campgrounds/edit', {camp});
 }));
 
-router.put('/:id', validateCampground, wrapAsync(async(req,res,next)=>{
+router.put('/:id', isLoggedIn, validateCampground, wrapAsync(async(req,res,next)=>{
 
     const id= req.params.id;
 
@@ -90,7 +91,7 @@ router.put('/:id', validateCampground, wrapAsync(async(req,res,next)=>{
 
 /**** DELETE **********************************************************************************************/
 
-router.delete('/:id', wrapAsync(async(req,res,next)=>{
+router.delete('/:id', isLoggedIn, wrapAsync(async(req,res,next)=>{
     const id= req.params.id;
     await campgroundModel.findByIdAndDelete(id);
     req.flash('success', "Campground Deleted");

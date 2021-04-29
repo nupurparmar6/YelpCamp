@@ -6,10 +6,14 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const ExpressError= require('./utilities/ExpressError');
 const methodOverride= require('method-override');
+const passport= require('passport');
+const localStrategy= require('passport-local');
+const userModel = require('./models/user.js');
 
 //routes
-const campgrounds= require('./routes/campgrounds.js');
-const reviews= require('./routes/reviews.js');
+const campgroundRoutes= require('./routes/campgrounds.js');
+const reviewRoutes= require('./routes/reviews.js');
+const userRoutes= require('./routes/users.js');
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false});
 
@@ -43,18 +47,31 @@ const sessionConfig={
     }
 
 }
-app.use(session(sessionConfig));
+app.use(session(sessionConfig)); //always place this above passport.session()
 app.use(flash()); //flash
+
+//passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStrategy(userModel.authenticate()));
+passport.serializeUser(userModel.serializeUser());
+passport.deserializeUser(userModel.deserializeUser());
 
 //flash middleware
 app.use((req,res,next)=>{
+    if(!(req.originalUrl=='/login'||req.originalUrl=='/'||req.originalUrl=='/register')){
+        req.session.returnToUrl= req.originalUrl;
+    }
+    res.locals.currentUser= req.user;
     res.locals.success= req.flash('success'); //res.locals.SUCCESS is they key here
     res.locals.error= req.flash('error'); //error is the key here
     next();
 })
 
-app.use('/campgrounds', campgrounds) //Router middleware
-app.use('/campgrounds/:id/reviews', reviews) //Router middleware
+//Router middleware
+app.use('/campgrounds', campgroundRoutes)
+app.use('/campgrounds/:id/reviews', reviewRoutes) 
+app.use('/', userRoutes);
 
 /********************************* ROUTES START *************************************************************************************************************************/
 
