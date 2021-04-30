@@ -2,25 +2,10 @@ const express= require('express');
 const router= express.Router();
 
 const wrapAsync= require('../utilities/wrapAsync');
-const {campgroundSchema}= require('../schemasForJoi.js');
-const ExpressError= require('../utilities/ExpressError');
 const campgroundModel= require('../models/campground.js');
-const isLoggedIn= require('../authMiddleware.js');
-
-const validateCampground= (req,res,next)=>{
-    
-    //joi gives the property of error
-    // console.log(req.body);
-    const result= campgroundSchema.validate(req.body);
-    // console.log(result.error);
-    if(result.error){
-        //details is an array thus we are extracting message from all and joining using ','
-        const message= result.error.details.map((element)=>element.message).join(',');
-        throw new ExpressError(message, 400)
-    }else{
-        next();
-    }
-}
+const {isLoggedIn,isAuthor,validateCampground}= require('../middlewares.js');
+// const isAuthor= require('../middlewares.js');
+// const validateCampground= require('../middlewares.js');
 
 /****** Adding Campgrounds CRUD functionality **********************************************************************************************/
 
@@ -38,6 +23,9 @@ router.post('/', isLoggedIn, validateCampground, wrapAsync(async(req,res,next)=>
     
     // if(!req.body.campgrounds) throw new ExpressError("Invalid Campground Data", 404); //USING JOI FOR THIS NOW
     const newCamp= new campgroundModel(req.body.campgrounds);
+    // console.log(newCamp);
+    newCamp.author= req.user._id;
+    // console.log(newCamp);
     await newCamp.save();
     req.flash('success', "Successfully created campground!");
     res.redirect(`/campgrounds/${newCamp._id}`);
@@ -54,7 +42,13 @@ router.get('/', wrapAsync(async(req,res,next)=>{
 //Details
 router.get('/:id', wrapAsync(async(req,res,next)=>{
     const id= req.params.id;
-    const camp= await campgroundModel.findById(id).populate('reviews');
+    const camp= await campgroundModel.findById(id).populate({
+        path: 'reviews',
+        populate:{
+            path: 'author'
+        }
+    }).populate('author');
+    // console.log(camp);
     // camp.populate('reviews');
     //in case id is invalid, we are flashing an error
     if(!camp){
@@ -67,7 +61,7 @@ router.get('/:id', wrapAsync(async(req,res,next)=>{
 /**** UPDATE **********************************************************************************************/
 
 //serves form
-router.get('/:id/edit', isLoggedIn, wrapAsync(async(req,res,next)=>{
+router.get('/:id/edit', isLoggedIn, isAuthor, wrapAsync(async(req,res,next)=>{
     const id= req.params.id;
     const camp= await campgroundModel.findById(id);
     //in case id is invalid, we are flashing an error
@@ -78,7 +72,7 @@ router.get('/:id/edit', isLoggedIn, wrapAsync(async(req,res,next)=>{
     res.render('campgrounds/edit', {camp});
 }));
 
-router.put('/:id', isLoggedIn, validateCampground, wrapAsync(async(req,res,next)=>{
+router.put('/:id', isLoggedIn, isAuthor, validateCampground, wrapAsync(async(req,res,next)=>{
 
     const id= req.params.id;
 
@@ -91,7 +85,7 @@ router.put('/:id', isLoggedIn, validateCampground, wrapAsync(async(req,res,next)
 
 /**** DELETE **********************************************************************************************/
 
-router.delete('/:id', isLoggedIn, wrapAsync(async(req,res,next)=>{
+router.delete('/:id', isLoggedIn, isAuthor, wrapAsync(async(req,res,next)=>{
     const id= req.params.id;
     await campgroundModel.findByIdAndDelete(id);
     req.flash('success', "Campground Deleted");
