@@ -45,7 +45,7 @@ async function seedDB(){
             location:`${city.city}, ${city.state}`,
             description: 'This beautiful campground is set in a very serene location overlooking the hills. It has something for everyone to explore and has all the necessary facilities. You can also rest assured that it won\'t burn a hole in your pocket! If you are looking for a beautiful weekend getaway and a break from the fast paced city life, this is the place for you! Pay a visit and make memories worth a lifetime!',
             price: price,
-            author: "608b16a1e1a1e468cf165276"
+            author: "608ec3a7632b4c9b43b39ae7"
         });
         
         await camp.save();
