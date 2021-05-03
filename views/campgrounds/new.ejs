@@ -7,7 +7,7 @@
             <h1 class="text-center">Add a new campground!</h1>
 
             <!-- novalidate is a bootstrap class which removes all required from inputs in html so that it can use its own pseudo classes to check for validation -->
-            <form action="/campgrounds" method="POST" novalidate class="needs-validation">
+            <form action="/campgrounds" method="POST" novalidate class="needs-validation" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="form-label" for="title">Name: </label>
                     <input class="form-control" type="text" name="campgrounds[title]" id="title" required>
@@ -18,12 +18,6 @@
                     <input class="form-control" type="text" name="campgrounds[location]" id="location" required>
                     <div class="valid-feedback">Looks good!</div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="image">Image URL: </label>
-                    <input class="form-control" type="text" name="campgrounds[image]" id="image" required>
-                    <div class="valid-feedback">Looks good!</div>
-                </div>
-
                 <div class="mb-3">
                     <label class="form-label" for="price">Price: </label>
                     <div class="input-group">
@@ -40,8 +34,15 @@
                     <textarea class="form-control" type="text" name="campgrounds[description]" id="description" required></textarea>
                     <div class="valid-feedback">Looks good!</div>
                 </div>
+
+                <div class="mb-3">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="image" name= "image" multiple>
+                        <label class="custom-file-label" for="image">Choose Image(s)</label>
+                      </div>
+                </div>
+
                 <div class="mb-3"><button class="btn btn-success">Submit</button></div>
-                    
             </form>
 
             <a href="/campgrounds">All campgrounds</a>

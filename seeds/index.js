@@ -25,7 +25,6 @@ function randomName(){
     return `${descriptors[rand1]} ${places[rand2]}`;
 }
 
-
 async function seedDB(){
 
     //delete existing camps
@@ -41,11 +40,24 @@ async function seedDB(){
         
         const camp= new campgroundModel({
             title:campName, 
-            image:'https://source.unsplash.com/collection/483251',
             location:`${city.city}, ${city.state}`,
             description: 'This beautiful campground is set in a very serene location overlooking the hills. It has something for everyone to explore and has all the necessary facilities. You can also rest assured that it won\'t burn a hole in your pocket! If you are looking for a beautiful weekend getaway and a break from the fast paced city life, this is the place for you! Pay a visit and make memories worth a lifetime!',
             price: price,
-            author: "608ec3a7632b4c9b43b39ae7"
+            author: "608ec3a7632b4c9b43b39ae7",
+            images:[
+                {
+                    url: "https://res.cloudinary.com/nupur/image/upload/v1620037341/YelpCamp/yelpcamp4_g874zh.jpg",
+                    filename: "YelpCamp/yelpcamp4_g874zh"
+                },
+                {
+                    url: "https://res.cloudinary.com/nupur/image/upload/v1620037341/YelpCamp/yelpcamp6_f86g2r.jpg",
+                    filename: "YelpCamp/yelpcamp6_f86g2r"
+                },
+                {
+                    url: "https://res.cloudinary.com/nupur/image/upload/v1620037341/YelpCamp/yelpcamp9_dl8frv.jpg",
+                    filename: "YelpCamp/yelpcamp9_dl8frv"
+                }
+            ]
         });
         
         await camp.save();

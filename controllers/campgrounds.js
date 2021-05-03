@@ -1,5 +1,6 @@
 
 const campgroundModel= require('../models/campground.js');
+const {cloudinary}= require('../cloudinary');
 
 module.exports.index= async(req,res,next)=>{
     let campsArr= await campgroundModel.find({});
@@ -14,6 +15,7 @@ module.exports.create= async(req,res,next)=>{
     
     // if(!req.body.campgrounds) throw new ExpressError("Invalid Campground Data", 404); //USING JOI FOR THIS NOW
     const newCamp= new campgroundModel(req.body.campgrounds);
+    newCamp.images= req.files.map(file=> ({url: file.path, filename: file.filename}));
     // console.log(newCamp);
     newCamp.author= req.user._id;
     // console.log("new camp:" ,newCamp);
@@ -43,8 +45,8 @@ module.exports.show= async(req,res)=>{
 
 module.exports.renderEditForm= async(req,res)=>{
     const id= req.params.id;
-    // const camp= await campgroundModel.findById(id);
-    console.log("found this camp to edit: ", camp);
+    const camp= await campgroundModel.findById(id);
+    // console.log("found this camp to edit: ", camp);
     //in case id is invalid, we are flashing an error
     if(!camp){
         req.flash('error', "Cannot find campground");
@@ -59,6 +61,16 @@ module.exports.edit= async(req,res)=>{
 
     //update in db
     const updatedCamp= await campgroundModel.findByIdAndUpdate(id,{...req.body.campgrounds});
+    const imgArr= req.files.map(file=> ({url: file.path, filename: file.filename}));
+    updatedCamp.images.push(...imgArr);
+    await updatedCamp.save();
+    if(req.body.deleteImages){
+        for(let filename of req.body.deleteImages){
+            await cloudinary.uploader.destroy(filename);
+        }
+
+        await updatedCamp.updateOne( {$pull: { images: { filename: { $in: req.body.deleteImages} } } });
+    }
     // console.log(id, " updated:" ,updatedCamp);
     req.flash('success', "Successfully updated campground!");
     //shows details page
