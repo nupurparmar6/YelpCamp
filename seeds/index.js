@@ -1,4 +1,6 @@
-
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+  }
 //file used to seed campground data. it will first delete existing campgrounds, then add random 50 to it
 
 const mongoose= require('mongoose');
@@ -15,6 +17,11 @@ mongoose.connection.once("open", ()=>{
 const citiesArr= require('./cities.js');
 const {descriptors,places}= require('./seedHelpers.js');
 
+const mbxGeocoding= require('@mapbox/mapbox-sdk/services/geocoding')
+const mapboxToken= process.env.MAPBOX_TOKEN;
+// console.log(mapboxToken);
+// const geocoder= mbxGeocoding({accessToken:'pk.eyJ1IjoibnVwdXJwYXJtYXIiLCJhIjoiY2tvOHkxMXFmMG00aTJ1czJ6cDcyaWZhYiJ9.Pyvj9Mhv6uhjN_sCiNNENg'});
+const geocoder= mbxGeocoding({accessToken:mapboxToken});
 /***************************************************************************************************/
 
 function randomName(){
@@ -37,25 +44,31 @@ async function seedDB(){
         
         let campName= randomName();
         const price= Math.floor(Math.random()*30)+10;
+
+        const geoData= await geocoder.forwardGeocode({
+            query: `${city.city}, ${city.state}`,
+            limit: 1
+        }).send()
         
         const camp= new campgroundModel({
             title:campName, 
             location:`${city.city}, ${city.state}`,
+            geometry: geoData.body.features[0].geometry,
             description: 'This beautiful campground is set in a very serene location overlooking the hills. It has something for everyone to explore and has all the necessary facilities. You can also rest assured that it won\'t burn a hole in your pocket! If you are looking for a beautiful weekend getaway and a break from the fast paced city life, this is the place for you! Pay a visit and make memories worth a lifetime!',
             price: price,
             author: "608ec3a7632b4c9b43b39ae7",
             images:[
                 {
-                    url: "https://res.cloudinary.com/nupur/image/upload/v1620037341/YelpCamp/yelpcamp4_g874zh.jpg",
-                    filename: "YelpCamp/yelpcamp4_g874zh"
+                    url: "https://res.cloudinary.com/nupur/image/upload/v1620208195/YelpCamp/yelpcamp4_obmljp.jpg",
+                    filename: "YelpCamp/yelpcamp4_obmljp"
                 },
                 {
-                    url: "https://res.cloudinary.com/nupur/image/upload/v1620037341/YelpCamp/yelpcamp6_f86g2r.jpg",
-                    filename: "YelpCamp/yelpcamp6_f86g2r"
+                    url: "https://res.cloudinary.com/nupur/image/upload/v1620208262/YelpCamp/yelpcamp6_w7pqrk.jpg",
+                    filename: "YelpCamp/yelpcamp6_w7pqrk"
                 },
                 {
-                    url: "https://res.cloudinary.com/nupur/image/upload/v1620037341/YelpCamp/yelpcamp9_dl8frv.jpg",
-                    filename: "YelpCamp/yelpcamp9_dl8frv"
+                    url: "https://res.cloudinary.com/nupur/image/upload/v1620208196/YelpCamp/yelpcamp9_wanw4j.jpg",
+                    filename: "YelpCamp/yelpcamp9_wanw4j"
                 }
             ]
         });
