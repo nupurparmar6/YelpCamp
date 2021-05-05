@@ -11,6 +11,8 @@ imageSchema.virtual('thumbnail').get(function(){
     return this.url.replace('/upload','/upload/w_200');
 });
 
+const opts= {toJSON: {virtuals:true}};
+
 const campgroundSchema= new mongoose.Schema({
     title: String,
     price: Number,
@@ -40,6 +42,11 @@ const campgroundSchema= new mongoose.Schema({
         }
     ]
 
+}, opts);
+
+//making a virtual on the campground schema for adding 'properties.popupMarkup'
+campgroundSchema.virtual('properties.popupMarkup').get(function(){
+    return `<a href="/campgrounds/${this._id}">${this.title}</a>`;
 });
 
 //middleware to delete all reviews once a campground is gone
