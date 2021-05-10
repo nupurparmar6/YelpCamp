@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="/stylesheets/stars.css">
 <div class="row">
     <div class="col-6">
-      <div id='map' style='width: 400px; height: 300px;'></div>
+      
       <div id="carouselImage" class="carousel slide" data-ride="carousel">
 
         <ol class="carousel-indicators">
@@ -46,9 +46,6 @@
       </div>
 
         <div class="card mb-3">
-          <!-- <% //for(let image of camp.images){ %> 
-            <img src="<%=//image.url %>" class="card-img-top" alt="...">
-          <% //} %>  -->
           
             <div class="card-body">
               <h5 class="card-title"><%= camp.title %></h5>
@@ -68,11 +65,18 @@
               </form>
             </div>
             <% }%> 
-            <a href="/campgrounds" class="card-link btn btn-info">All campgrounds</a>
-            <div class="card-footer text-muted"> 2 days ago</div>
+            <!-- <a href="/campgrounds" class="card-link btn btn-info">All campgrounds</a> -->
+            <!-- <div class="card-footer text-muted"> 2 days ago</div> -->
+            <% if(!currentUser){ %> 
+            <div class="card-footer text-muted">Author of this camp? Login to edit!</div> 
+            <% } %> 
           </div>
     </div>
     <div class="col-6">
+      <div id='map' class="mb-3"></div>
+      <% if(!currentUser){ %> 
+        <div class="mt-5 mb-3 ml-1 text-muted"><h5>Sign-up/login to add your reviews!</h5></div>
+      <% } %> 
       <% if(currentUser){ %> 
       <h4>Leave a Review!</h4>
           <form action="/campgrounds/<%=camp.id%>/reviews" method="POST" class="mb-3 needs-validation" novalidate>

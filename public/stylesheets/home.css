@@ -1,0 +1,107 @@
+body {
+    height: 100vh;
+    background-color:black;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+    url("https://images.unsplash.com/photo-1563299796-17596ed6b017?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxhbGx8fHx8fHx8fHwxNjE1NDE3NTUz&ixlib=rb-1.2.1&q=80&w=1080&utm_source=unsplash_source&utm_medium=referral&utm_campaign=api-credit");
+    background-size: cover;
+    background-position: center;
+    text-shadow: 0 0.05rem 0.1rem rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 0 5rem rgba(0, 0, 0, 0.5);
+    /* -webkit-transition: background-image 5s ease-in-out transform;
+    transition: background-image 5s ease-in-out transform;  */
+}
+.cover-container {
+  max-width: 80vw;
+}
+
+.nav-link {
+    padding: 0.25rem 0;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    margin-left: 1rem;
+    border-bottom: 0.25rem solid transparent;
+}
+
+.nav-link:hover{
+    color: rgba(255,255,255,0.5);
+    border-bottom-color:rgba(255,255,255,0.5);
+}
+
+.nav-link.active {
+    color: white;
+    border-bottom-color:white;
+
+}
+
+.btn-secondary, .btn-secondary:hover{
+    color: #333;
+    text-shadow: none;
+}
+
+
+/* body:hover {
+   transform: scale(1.5,1.5);
+} */
+
+/* background slide show */
+ /* .slideshow { 
+    height: 100%;
+    left: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 0;
+  }
+  
+  .slideshow li {  */
+    /* animation: imageAnimation 50s linear 2.5s infinite;  */
+    /* background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url(https://res.cloudinary.com/nupur/image/upload/v1620302798/YelpCamp/bg_d231pr.jpg);
+    height: 100%;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 0; */
+    /* transform: scale(1); */
+    /* transition: background-image 5s transform ease-in-out; */
+    /* transition: background-image, transform 5s; */
+  /* } */
+
+  /* .slideshow li:hover{
+    transform: scale(1.5,1.5);
+  } */
+  
+  /* .slideshow li:nth-child(1) { 
+    background-image: url(https://res.cloudinary.com/nupur/image/upload/v1620302798/YelpCamp/bg_d231pr.jpg);
+    transition: background-image 5s ease-in-out;
+  } */
+  
+  
+  /* @keyframes imageAnimation { 
+    0%, 40% { 
+      animation-timing-function: ease-in;
+      opacity: 0; 
+      transform: scale(1);
+    }
+    10% {
+      animation-timing-function: ease-out;
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    20% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+    30% {
+      opacity: 0;
+      transform: scale(1.2);
+    }
+  }  */
+  

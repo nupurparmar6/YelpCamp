@@ -61,8 +61,8 @@ async function seedDB(){
             author: "608ec3a7632b4c9b43b39ae7",
             images:[
                 {
-                    url: "https://res.cloudinary.com/nupur/image/upload/v1620208195/YelpCamp/yelpcamp4_obmljp.jpg",
-                    filename: "YelpCamp/yelpcamp4_obmljp"
+                    url: "https://res.cloudinary.com/nupur/image/upload/v1620645251/YelpCamp/yelpcamp4_r6v4pw.jpg",
+                    filename: "YelpCamp/yelpcamp4_r6v4pw"
                 },
                 {
                     url: "https://res.cloudinary.com/nupur/image/upload/v1620208262/YelpCamp/yelpcamp6_w7pqrk.jpg",
