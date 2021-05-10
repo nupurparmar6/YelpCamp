@@ -13,6 +13,8 @@ const methodOverride= require('method-override');
 const passport= require('passport');
 const localStrategy= require('passport-local');
 const userModel = require('./models/user.js');
+const expressMongoSanitize= require('express-mongo-sanitize');
+const helmet = require('helmet');
 
 //routes
 const campgroundRoutes= require('./routes/campgrounds.js');
@@ -38,6 +40,7 @@ app.use(express.urlencoded({extended: true})); //required to parse req.body
 app.use(methodOverride('_method')); //to send other kinds of requests than post/get from forms
 
 app.use(express.static(path.join(__dirname, 'public'))); //serving public assets from public directory
+app.use(expressMongoSanitize());
 
 //session stuff
 const sessionConfig={
@@ -45,7 +48,9 @@ const sessionConfig={
     resave: false,
     saveUninitialized: true,
     cookie:{
+        name: 'session', //connect.sid won't be the name anymore
         httpOnly: true,
+        // secure: true, //can only be accessed through secure requests now
         expires: Date.now() + (1000*60*60*24*7),
         maxAge: 1000*60*60*24*7
     }
@@ -53,6 +58,59 @@ const sessionConfig={
 }
 app.use(session(sessionConfig)); //always place this above passport.session()
 app.use(flash()); //flash
+
+//using helmet to add additional security to our headers
+app.use(helmet());//enables all 11 middlweares that helmet comes with
+
+//all the sources which we are verifying and adding to our content security policy using helmet
+const scriptSrcUrls = [
+    // "https://stackpath.bootstrapcdn.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://api.mapbox.com/",
+    "https://kit.fontawesome.com/",
+    "https://cdnjs.cloudflare.com/",
+    "https://cdn.jsdelivr.net",
+    "https://use.fontawesome.com/releases/v5.15.1/js/all.js", //moi
+    "https://code.jquery.com/jquery-3.5.1.slim.min.js", //moi
+];
+const styleSrcUrls = [
+    "https://kit-free.fontawesome.com/",
+    // "https://stackpath.bootstrapcdn.com/",
+    "https://api.mapbox.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://fonts.googleapis.com/",
+    "https://use.fontawesome.com/",
+    "https://code.jquery.com/jquery-3.5.1.slim.min.js", //moi
+    "https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css", //moi
+];
+const connectSrcUrls = [
+    "https://api.mapbox.com/",
+    "https://a.tiles.mapbox.com/",
+    "https://b.tiles.mapbox.com/",
+    "https://events.mapbox.com/",
+    
+];
+const fontSrcUrls = [];
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "'self'",
+                "blob:",
+                "data:",
+                "https://res.cloudinary.com/nupur/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
+                "https://images.unsplash.com/",
+            ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
 
 //passport middleware
 app.use(passport.initialize());
@@ -77,17 +135,16 @@ app.use('/campgrounds', campgroundRoutes)
 app.use('/campgrounds/:id/reviews', reviewRoutes) 
 app.use('/', userRoutes);
 
-/********************************* ROUTES START *************************************************************************************************************************/
-
+/********************************* Home Route *************************************************************************************************************************/
 app.get('/', (req,res)=>{
     res.render('home');
 })
 
 /***** Error handling middleware **********************************************************************************************/
-//.all means get/post/put etc. anything would work
 app.all('*',(req,res,next)=>{
     next(new ExpressError("Page Not Found(responding to error from all route)",404));
 })
+
 //this error handler will be hit whenever we throw an instance of ExpressError or any other error occurs on its own
 app.use((err,req,res,next)=>{
     const {statusCode=500}= err;
